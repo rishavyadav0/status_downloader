@@ -23,63 +23,15 @@
                         <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
                 </div>
-                <h1>Payment Required</h1>
+                <h1>Service Notice: Payment Required</h1>
             </div>
             
             <div class="notice-body">
                 <p>Access to this website has been temporarily suspended due to outstanding administrative fees. Please settle the remaining balance to restore full functionality.</p>
-                
-                <div class="bill-box">
-                    <div class="bill-row">
-                        <span>App Development + Ad integration</span>
-                        <span>₹1500</span>
-                    </div>
-                    <div class="bill-row">
-                        <span>Website + Hosting</span>
-                        <span>₹100</span>
-                    </div>
-                    <div class="bill-row total">
-                        <span>Total Due</span>
-                        <span>₹1600</span>
-                    </div>
-                </div>
-
-                <p class="sub-text">If you believe this is an error, please contact the developer immediately.</p>
-            </div>
-
-            <div class="payment-section">
-                <div class="qr-wrapper">
-                    <div class="qr-container">
-                        <img src="payment-qr.jpg" alt="Payment QR Code">
-                    </div>
-                </div>
-                
-                <div class="upi-details">
-                    <p class="upi-label">UPI ID</p>
-                    <div class="upi-box">
-                        <span id="upi-id">rishav.3810@waaxis</span>
-                        <button class="copy-btn" id="copy-btn" title="Copy UPI ID">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                    </div>
-                    
-                    <p class="payment-instruction">Pay on UPI or by scanning QR or simply click below pay now</p>
-                    <a href="upi://pay?pa=rishav.3810@waaxis&pn=Developer&am=1600&cu=INR" class="btn-primary">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        Pay Now
-                    </a>
-                </div>
-            </div>
-
-            <div class="notice-footer">
-                <div class="info-box">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                    <p>After completing the transaction, please send a screenshot to the developer to verify your payment and restore access.</p>
-                </div>
+                <p class="sub-text" style="margin-top: 15px;">If you believe this is an error, please contact the developer immediately.</p>
             </div>
         </div>
     </div>
-    <script src="payment.js"></script>
     <script>
         // Simple fade-in animation
         document.addEventListener('DOMContentLoaded', () => {
