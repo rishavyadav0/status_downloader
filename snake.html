@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Snake – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css">
+    <link rel="stylesheet" href="gamezone.css">
+</head>
+<body>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h2 class="game-page-title">🐍 Snake</h2>
+    </div>
+
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+
+    <canvas id="canvas" class="game-canvas" width="340" height="340"></canvas>
+    <button id="startBtn" class="action-btn">▶ Start Game</button>
+
+    <div class="dpad">
+        <button class="dpad-btn" id="dUp">▲</button>
+        <div class="dpad-row">
+            <button class="dpad-btn" id="dLeft">◀</button>
+            <button class="dpad-btn" id="dRight">▶</button>
+        </div>
+        <button class="dpad-btn" id="dDown">▼</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const startBtn = document.getElementById('startBtn');
+    const GRID = 17, SIZE = canvas.width / GRID;
+    let snake, food, dx, dy, score, best = +localStorage.getItem('snakeBest') || 0, running = false, timer;
+    bestEl.textContent = best;
+
+    function init() {
+        snake = [{x:8,y:8}];
+        dx = 1; dy = 0;
+        score = 0; scoreEl.textContent = 0;
+        placeFood();
+        clearInterval(timer);
+        running = true;
+        timer = setInterval(tick, 105);
+    }
+
+    function placeFood() {
+        do { food = {x: Math.floor(Math.random()*GRID), y: Math.floor(Math.random()*GRID)}; }
+        while (snake.some(s => s.x===food.x && s.y===food.y));
+    }
+
+    function tick() {
+        const head = {x: snake[0].x+dx, y: snake[0].y+dy};
+        if (head.x<0||head.x>=GRID||head.y<0||head.y>=GRID||snake.some(s=>s.x===head.x&&s.y===head.y)) {
+            running=false; clearInterval(timer); drawOverlay('Game Over!', `Score: ${score}`); startBtn.style.display='block'; return;
+        }
+        snake.unshift(head);
+        if (head.x===food.x && head.y===food.y) {
+            score+=10; scoreEl.textContent=score;
+            if(score>best){best=score;localStorage.setItem('snakeBest',best);bestEl.textContent=best;}
+            placeFood();
+        } else snake.pop();
+        draw();
+    }
+
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        // Food
+        ctx.fillStyle='#ef4444';
+        ctx.beginPath();
+        ctx.arc(food.x*SIZE+SIZE/2, food.y*SIZE+SIZE/2, SIZE/2-2, 0, Math.PI*2);
+        ctx.fill();
+        // Snake
+        snake.forEach((s,i) => {
+            ctx.fillStyle = i===0 ? '#34d399' : '#10b981';
+            ctx.beginPath();
+            ctx.roundRect(s.x*SIZE+2, s.y*SIZE+2, SIZE-4, SIZE-4, 4);
+            ctx.fill();
+        });
+    }
+
+    function drawOverlay(title, sub) {
+        ctx.fillStyle='rgba(0,0,0,0.65)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle='white'; ctx.textAlign='center';
+        ctx.font='bold 24px Outfit,sans-serif'; ctx.fillText(title, canvas.width/2, canvas.height/2-14);
+        ctx.font='16px Outfit,sans-serif'; ctx.fillStyle='#94a3b8'; ctx.fillText(sub, canvas.width/2, canvas.height/2+18);
+    }
+
+    // Initial canvas
+    ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.textAlign='center';
+    ctx.font='bold 20px Outfit,sans-serif'; ctx.fillText('Tap Start to Play 🐍', canvas.width/2, canvas.height/2);
+
+    startBtn.addEventListener('click', () => { startBtn.style.display='none'; init(); });
+
+    // Keys
+    document.addEventListener('keydown', e => {
+        if(!running) return;
+        if(e.key==='ArrowLeft'&&dx!==1){dx=-1;dy=0;} 
+        else if(e.key==='ArrowRight'&&dx!==-1){dx=1;dy=0;}
+        else if(e.key==='ArrowUp'&&dy!==1){dx=0;dy=-1;}
+        else if(e.key==='ArrowDown'&&dy!==-1){dx=0;dy=1;}
+        if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+    });
+
+    // D-pad
+    document.getElementById('dUp').addEventListener('touchstart',e=>{e.preventDefault();if(running&&dy!==1){dx=0;dy=-1;}},{passive:false});
+    document.getElementById('dDown').addEventListener('touchstart',e=>{e.preventDefault();if(running&&dy!==-1){dx=0;dy=1;}},{passive:false});
+    document.getElementById('dLeft').addEventListener('touchstart',e=>{e.preventDefault();if(running&&dx!==1){dx=-1;dy=0;}},{passive:false});
+    document.getElementById('dRight').addEventListener('touchstart',e=>{e.preventDefault();if(running&&dx!==-1){dx=1;dy=0;}},{passive:false});
+    document.getElementById('dUp').addEventListener('mousedown',()=>{if(running&&dy!==1){dx=0;dy=-1;}});
+    document.getElementById('dDown').addEventListener('mousedown',()=>{if(running&&dy!==-1){dx=0;dy=1;}});
+    document.getElementById('dLeft').addEventListener('mousedown',()=>{if(running&&dx!==1){dx=-1;dy=0;}});
+    document.getElementById('dRight').addEventListener('mousedown',()=>{if(running&&dx!==-1){dx=1;dy=0;}});
+
+    // Swipe
+    let tx=0,ty=0;
+    canvas.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;e.preventDefault();},{passive:false});
+    canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+    canvas.addEventListener('touchend',e=>{
+        if(!running) return;
+        const ex=e.changedTouches[0].clientX, ey=e.changedTouches[0].clientY;
+        const ddx=ex-tx, ddy=ey-ty;
+        if(Math.abs(ddx)>Math.abs(ddy)){
+            if(ddx>20&&dx!==-1){dx=1;dy=0;} else if(ddx<-20&&dx!==1){dx=-1;dy=0;}
+        } else {
+            if(ddy>20&&dy!==-1){dx=0;dy=1;} else if(ddy<-20&&dy!==1){dx=0;dy=-1;}
+        }
+    });
+</script>
+</body>
+</html>

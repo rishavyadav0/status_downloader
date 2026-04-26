@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tic Tac Toe – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css">
+    <link rel="stylesheet" href="gamezone.css">
+    <style>
+        .ttt-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 310px;
+            max-width: 100%;
+        }
+        .ttt-cell {
+            width: 92px; height: 92px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            font-size: 2.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        .ttt-cell:hover:not(.taken) { background: rgba(255,255,255,0.1); }
+        .ttt-cell:active:not(.taken) { transform: scale(0.92); }
+        .ttt-cell.win { background: rgba(99,102,241,0.25); border-color: #6366f1; }
+        .ttt-status {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+            text-align: center;
+            min-height: 28px;
+        }
+        .ttt-scores {
+            display: flex; gap: 12px; margin-bottom: 20px;
+        }
+        .ttt-score-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px 20px;
+            text-align: center;
+            min-width: 72px;
+        }
+        .ttt-score-box .label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+        .ttt-score-box .val { font-size: 1.5rem; font-weight: 800; color: #f1f5f9; }
+        .ttt-score-box.you .val { color: #6366f1; }
+        .ttt-score-box.ai .val { color: #ef4444; }
+        .ttt-score-box.draw .val { color: #f59e0b; }
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header">
+        <a href="index.html" class="back-btn">← Back</a>
+        <h2 class="game-page-title">❌ Tic Tac Toe</h2>
+    </div>
+
+    <div class="ttt-scores">
+        <div class="ttt-score-box you"><div class="label">You (X)</div><div class="val" id="scoreYou">0</div></div>
+        <div class="ttt-score-box draw"><div class="label">Draw</div><div class="val" id="scoreDraw">0</div></div>
+        <div class="ttt-score-box ai"><div class="label">AI (O)</div><div class="val" id="scoreAI">0</div></div>
+    </div>
+
+    <div class="ttt-status" id="status">Your turn — tap a cell</div>
+
+    <div class="ttt-grid" id="board">
+        <div class="ttt-cell" data-i="0"></div>
+        <div class="ttt-cell" data-i="1"></div>
+        <div class="ttt-cell" data-i="2"></div>
+        <div class="ttt-cell" data-i="3"></div>
+        <div class="ttt-cell" data-i="4"></div>
+        <div class="ttt-cell" data-i="5"></div>
+        <div class="ttt-cell" data-i="6"></div>
+        <div class="ttt-cell" data-i="7"></div>
+        <div class="ttt-cell" data-i="8"></div>
+    </div>
+    <button class="action-btn" id="restartBtn" style="margin-top:22px">New Game</button>
+    <p style="color:#475569;font-size:0.8rem;margin-top:12px;text-align:center;">Tip: The AI is unbeatable — your best is a draw!</p>
+</div>
+
+<script>
+    const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    let board, gameOver, scores = {you:0,ai:0,draw:0};
+    const cells = document.querySelectorAll('.ttt-cell');
+    const statusEl = document.getElementById('status');
+
+    function newGame() {
+        board = Array(9).fill(null);
+        gameOver = false;
+        cells.forEach(c => { c.textContent=''; c.classList.remove('taken','win'); });
+        statusEl.textContent = "Your turn — tap a cell";
+    }
+
+    function checkWin(b, p) {
+        return WINS.find(w => w.every(i => b[i]===p)) || null;
+    }
+
+    function minimax(b, isMax) {
+        const wX = checkWin(b,'X'), wO = checkWin(b,'O');
+        if(wO) return 10;
+        if(wX) return -10;
+        if(b.every(c=>c)) return 0;
+        const moves = b.map((v,i)=>v?null:i).filter(v=>v!==null);
+        if(isMax) {
+            let best=-Infinity;
+            moves.forEach(i=>{b[i]='O'; best=Math.max(best,minimax(b,false)); b[i]=null;});
+            return best;
+        } else {
+            let best=Infinity;
+            moves.forEach(i=>{b[i]='X'; best=Math.min(best,minimax(b,true)); b[i]=null;});
+            return best;
+        }
+    }
+
+    function aiMove() {
+        let best=-Infinity, move=-1;
+        board.forEach((v,i)=>{
+            if(!v){board[i]='O'; const s=minimax(board,false); board[i]=null; if(s>best){best=s;move=i;}}
+        });
+        if(move!==-1) makeMove(move,'O');
+    }
+
+    function makeMove(i, player) {
+        board[i] = player;
+        cells[i].textContent = player==='X'?'❌':'⭕';
+        cells[i].classList.add('taken');
+        const win = checkWin(board, player);
+        if(win) {
+            win.forEach(idx => cells[idx].classList.add('win'));
+            gameOver=true;
+            if(player==='X'){ scores.you++; statusEl.textContent='🎉 You won! (Wow!)'; document.getElementById('scoreYou').textContent=scores.you; }
+            else { scores.ai++; statusEl.textContent='🤖 AI wins! Try again.'; document.getElementById('scoreAI').textContent=scores.ai; }
+        } else if(board.every(c=>c)) {
+            gameOver=true; scores.draw++;
+            statusEl.textContent='🤝 Draw! Great defense!';
+            document.getElementById('scoreDraw').textContent=scores.draw;
+        } else if(player==='X') {
+            statusEl.textContent="🤖 AI is thinking...";
+            setTimeout(aiMove, 350);
+        } else {
+            statusEl.textContent="Your turn — tap a cell";
+        }
+    }
+
+    cells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            const i = +cell.dataset.i;
+            if(gameOver || board[i]) return;
+            makeMove(i,'X');
+        });
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', newGame);
+    newGame();
+</script>
+</body>
+</html>
