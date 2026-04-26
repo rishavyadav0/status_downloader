@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Reaction Timer</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+<style>.rt-box{width:min(320px,90vw);height:220px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:12px;border:2px solid rgba(255,255,255,0.1);-webkit-tap-highlight-color:transparent;user-select:none;transition:background .15s;}.rt-box.wait{background:rgba(239,68,68,0.25);}.rt-box.ready{background:rgba(16,185,129,0.3);}.rt-box.idle,.rt-box.result{background:rgba(255,255,255,0.05);}.rt-box.early{background:rgba(245,158,11,0.25);}.rt-big{font-size:2.5rem;font-weight:800;color:#f1f5f9;}.rt-sub{font-size:.9rem;color:#64748b;}.rt-chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px;}.rt-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:4px 12px;font-size:.82rem;color:#94a3b8;}</style></head>
+<body><div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+<div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">⚡ Reaction Timer</h2></div>
+<div class="score-row"><div class="score-pill">Best: <span id="best">—</span>ms</div><div class="score-pill">Avg: <span id="avg">—</span>ms</div></div>
+<br>
+<div class="rt-box idle" id="box"><div class="rt-big" id="rtBig">🎯</div><div class="rt-sub" id="rtSub">Tap to Start</div></div>
+<div class="rt-chips" id="chips"></div>
+</div>
+<script>
+let state='idle',timer,startTime,results=[],best=null;
+const box=document.getElementById('box'),bigEl=document.getElementById('rtBig'),subEl=document.getElementById('rtSub'),bestEl=document.getElementById('best'),avgEl=document.getElementById('avg'),chipsEl=document.getElementById('chips');
+function go(){
+  if(state==='idle'||state==='result'){state='wait';box.className='rt-box wait';bigEl.textContent='🔴';subEl.textContent='Wait for GREEN...';timer=setTimeout(()=>{state='go';box.className='rt-box ready';bigEl.textContent='🟢';subEl.textContent='TAP NOW!';startTime=Date.now();},1500+Math.random()*2500);}
+  else if(state==='wait'){clearTimeout(timer);state='early';box.className='rt-box early';bigEl.textContent='⚠️';subEl.textContent='Too early!';setTimeout(reset,1200);}
+  else if(state==='go'){
+    const ms=Date.now()-startTime;state='result';box.className='rt-box result';bigEl.textContent=ms+'ms';subEl.textContent=ms<200?'⚡ Insane!':ms<300?'🔥 Great!':ms<400?'👍 Good!':'🐢 Practice!';
+    results.unshift(ms);if(results.length>5)results.pop();
+    if(best===null||ms<best){best=ms;bestEl.textContent=best;}
+    avgEl.textContent=Math.round(results.reduce((a,b)=>a+b,0)/results.length);
+    chipsEl.innerHTML=results.map((r,i)=>`<span class="rt-chip">${i===0?'▶ ':''}${r}ms</span>`).join('');
+    setTimeout(reset,1800);
+  }
+}
+function reset(){state='idle';box.className='rt-box idle';bigEl.textContent='🎯';subEl.textContent='Tap to try again';}
+box.addEventListener('click',go);box.addEventListener('touchstart',e=>{e.preventDefault();go();},{passive:false});
+</script></body></html>

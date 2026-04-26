@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Type Racer – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .type-display{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:20px;width:min(380px,95vw);font-size:1.1rem;line-height:1.8;letter-spacing:.02em;margin-bottom:16px;min-height:80px;}
+        .type-display .correct{color:#10b981;}
+        .type-display .wrong{color:#ef4444;background:rgba(239,68,68,0.15);border-radius:3px;}
+        .type-display .current{background:#6366f1;border-radius:3px;color:#fff;}
+        .type-display .pending{color:#64748b;}
+        .type-input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 16px;width:min(380px,95vw);color:#f1f5f9;font-size:1rem;font-family:'Outfit',sans-serif;outline:none;transition:border-color .2s;}
+        .type-input:focus{border-color:rgba(99,102,241,0.6);}
+        .type-stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+        .type-stat{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 14px;text-align:center;}
+        .type-stat .l{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+        .type-stat .v{font-size:1.2rem;font-weight:800;color:#f1f5f9;}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">⌨️ Type Racer</h2></div>
+    <div class="type-stats">
+        <div class="type-stat"><div class="l">WPM</div><div class="v" id="wpm">0</div></div>
+        <div class="type-stat"><div class="l">Accuracy</div><div class="v" id="acc">100%</div></div>
+        <div class="type-stat"><div class="l">Time</div><div class="v" id="time">60s</div></div>
+        <div class="type-stat"><div class="l">Best WPM</div><div class="v" id="best">0</div></div>
+    </div>
+    <div class="type-display" id="display"></div>
+    <input class="type-input" id="input" placeholder="Start typing to begin..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="action-btn" id="restartBtn" style="margin-top:14px">🔄 Restart</button>
+</div>
+<script>
+    const SENTENCES=[
+        'the quick brown fox jumps over the lazy dog',
+        'pack my box with five dozen liquor jugs',
+        'how vexingly quick daft zebras jump',
+        'the five boxing wizards jump quickly',
+        'sphinx of black quartz judge my vow',
+        'two driven jocks help fax my big quiz',
+        'jackdaws love my big sphinx of quartz',
+        'the job requires extra pluck and zeal from every young wage earner',
+        'a mad boxer shot a quick gloved jab to the jaw of his dizzy opponent',
+        'we promptly judged antique ivory buckles for the next prize',
+    ];
+
+    let text,pos,errors,startTime,timer,started,best=+localStorage.getItem('typeBest')||0;
+    const displayEl=document.getElementById('display'),inputEl=document.getElementById('input'),wpmEl=document.getElementById('wpm'),accEl=document.getElementById('acc'),timeEl=document.getElementById('time'),bestEl=document.getElementById('best'),restartBtn=document.getElementById('restartBtn');
+    bestEl.textContent=best;
+
+    function init(){
+        text=SENTENCES[Math.floor(Math.random()*SENTENCES.length)];
+        pos=0; errors=0; started=false; clearInterval(timer);
+        inputEl.value=''; inputEl.disabled=false; inputEl.focus();
+        timeEl.textContent='60s'; wpmEl.textContent='0'; accEl.textContent='100%';
+        render();
+    }
+
+    function render(){
+        displayEl.innerHTML=text.split('').map((ch,i)=>{
+            if(i<pos){const ok=true;return `<span class="correct">${ch}</span>`;}
+            if(i===pos)return `<span class="current">${ch}</span>`;
+            return `<span class="pending">${ch}</span>`;
+        }).join('');
+    }
+
+    let timeLeft=60;
+    inputEl.addEventListener('input',()=>{
+        if(!started){
+            started=true; startTime=Date.now(); timeLeft=60;
+            timer=setInterval(()=>{
+                timeLeft--; timeEl.textContent=timeLeft+'s';
+                const elapsed=(Date.now()-startTime)/1000/60;
+                const wpm=Math.round((pos/5)/elapsed);
+                wpmEl.textContent=wpm;
+                if(timeLeft<=0){
+                    clearInterval(timer); inputEl.disabled=true;
+                    const finalWpm=Math.round((pos/5)/1);
+                    if(wpm>best){best=wpm;localStorage.setItem('typeBest',best);bestEl.textContent=best;}
+                    displayEl.innerHTML=`<span style="color:#10b981;font-weight:700">Time's up! WPM: ${wpm} · Accuracy: ${accEl.textContent}</span>`;
+                }
+            },1000);
+        }
+        const typed=inputEl.value;
+        const last=typed[typed.length-1];
+        if(last===text[pos]){pos++;if(pos===text.length){clearInterval(timer);inputEl.disabled=true;const wpm=Math.round((pos/5)/((Date.now()-startTime)/1000/60));wpmEl.textContent=wpm;if(wpm>best){best=wpm;localStorage.setItem('typeBest',best);bestEl.textContent=best;}}}
+        else errors++;
+        const acc=Math.round(100-(errors/Math.max(1,pos+errors))*100);
+        accEl.textContent=acc+'%';
+        inputEl.value='';
+        render();
+    });
+
+    restartBtn.addEventListener('click',init);
+    init();
+</script>
+</body></html>

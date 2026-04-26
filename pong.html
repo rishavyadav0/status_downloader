@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Pong – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🏓 Pong</h2></div>
+    <canvas id="c" class="game-canvas" width="340" height="480" style="touch-action:none"></canvas>
+    <p style="color:#475569;font-size:.82rem;margin-top:10px;text-align:center">Slide/drag to move your paddle</p>
+</div>
+<script>
+    const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height,PW=80,PH=12,BR=8;
+    let player,ai,ball,scoreP,scoreAI,raf,started=false;
+
+    function init(){
+        player={x:W/2-PW/2,y:H-30};
+        ai={x:W/2-PW/2,y:18};
+        ball={x:W/2,y:H/2,vx:3*(Math.random()<.5?1:-1),vy:-4};
+        scoreP=0;scoreAI=0;started=false;
+    }
+
+    function draw(){
+        ctx.clearRect(0,0,W,H);
+        // BG
+        ctx.fillStyle='rgba(15,23,42,0.9)'; ctx.fillRect(0,0,W,H);
+        // Dashed midline
+        ctx.setLineDash([8,8]); ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke(); ctx.setLineDash([]);
+        // Scores
+        ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.font='bold 28px Outfit,sans-serif'; ctx.textAlign='center';
+        ctx.fillText(scoreAI,W/2,H/2-18); ctx.fillText(scoreP,W/2,H/2+36);
+
+        // Paddles
+        function drawPad(p,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(p.x,p.y,PW,PH,6);ctx.fill();}
+        drawPad(player,'#6366f1'); drawPad(ai,'#ef4444');
+
+        // Ball
+        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(ball.x,ball.y,BR,0,Math.PI*2); ctx.fill();
+
+        if(!started){
+            ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.font='16px Outfit,sans-serif';
+            ctx.fillText('Tap to Start',W/2,H/2+60);
+            requestAnimationFrame(draw); return;
+        }
+
+        // Move ball
+        ball.x+=ball.vx; ball.y+=ball.vy;
+        if(ball.x-BR<0){ball.x=BR;ball.vx*=-1;}
+        if(ball.x+BR>W){ball.x=W-BR;ball.vx*=-1;}
+
+        // Player paddle
+        if(ball.vy>0&&ball.y+BR>=player.y&&ball.y+BR<=player.y+PH&&ball.x>player.x&&ball.x<player.x+PW){
+            ball.vy=-Math.abs(ball.vy)*1.04; ball.vx+=(ball.x-(player.x+PW/2))/12;
+        }
+        // AI paddle
+        if(ball.vy<0&&ball.y-BR<=ai.y+PH&&ball.y-BR>=ai.y&&ball.x>ai.x&&ball.x<ai.x+PW){
+            ball.vy=Math.abs(ball.vy)*1.04;
+        }
+        // AI movement
+        const aiCenter=ai.x+PW/2, speed=2.8;
+        if(aiCenter<ball.x-4)ai.x+=speed; else if(aiCenter>ball.x+4)ai.x-=speed;
+        ai.x=Math.max(0,Math.min(W-PW,ai.x));
+
+        // Score
+        if(ball.y+BR>H){scoreAI++;ball={x:W/2,y:H/2,vx:3*(Math.random()<.5?1:-1),vy:-4};}
+        if(ball.y-BR<0){scoreP++;ball={x:W/2,y:H/2,vx:3*(Math.random()<.5?1:-1),vy:4};}
+
+        raf=requestAnimationFrame(draw);
+    }
+
+    // Controls
+    canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();player.x=Math.max(0,Math.min(W-PW,e.clientX-r.left-PW/2));});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();player.x=Math.max(0,Math.min(W-PW,e.touches[0].clientX-r.left-PW/2));},{passive:false});
+    canvas.addEventListener('click',()=>{if(!started){started=true;}});
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();if(!started){started=true;}},{passive:false});
+
+    init(); draw();
+</script>
+</body></html>

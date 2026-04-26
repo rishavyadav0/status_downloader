@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Rock Paper Scissors – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .rps-btns{display:flex;gap:16px;margin:20px 0;}
+        .rps-btn{width:88px;height:88px;border-radius:18px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);font-size:2.5rem;cursor:pointer;transition:transform .15s,background .15s;-webkit-tap-highlight-color:transparent;}
+        .rps-btn:active,.rps-btn:hover{background:rgba(255,255,255,0.15);transform:scale(1.08);}
+        .rps-result{font-size:1.2rem;font-weight:700;text-align:center;min-height:32px;margin:8px 0;}
+        .rps-board{display:flex;gap:24px;align-items:center;margin:16px 0;}
+        .rps-side{text-align:center;}
+        .rps-emoji{font-size:3rem;height:60px;line-height:60px;}
+        .rps-label{font-size:.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+        .vs{font-size:1.2rem;font-weight:800;color:#475569;}
+        .rps-scores{display:flex;gap:12px;margin-bottom:16px;}
+        .rps-score-box{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:8px 16px;text-align:center;}
+        .rps-score-box .l{font-size:.68rem;color:#64748b;text-transform:uppercase;letter-spacing:.08em;font-weight:700;}
+        .rps-score-box .v{font-size:1.4rem;font-weight:800;}
+        .win-v{color:#10b981;} .lose-v{color:#ef4444;} .draw-v{color:#f59e0b;}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">✌️ Rock Paper Scissors</h2></div>
+    <div class="rps-scores">
+        <div class="rps-score-box"><div class="l">You</div><div class="v win-v" id="scoreYou">0</div></div>
+        <div class="rps-score-box"><div class="l">Draw</div><div class="v draw-v" id="scoreDraw">0</div></div>
+        <div class="rps-score-box"><div class="l">AI</div><div class="v lose-v" id="scoreAI">0</div></div>
+        <div class="rps-score-box"><div class="l">Round</div><div class="v" id="round">1/10</div></div>
+    </div>
+    <div class="rps-board">
+        <div class="rps-side"><div class="rps-emoji" id="yourEmoji">❓</div><div class="rps-label">You</div></div>
+        <div class="vs">VS</div>
+        <div class="rps-side"><div class="rps-emoji" id="aiEmoji">❓</div><div class="rps-label">AI</div></div>
+    </div>
+    <div class="rps-result" id="result">Choose your move!</div>
+    <div class="rps-btns">
+        <button class="rps-btn" data-v="rock">🪨</button>
+        <button class="rps-btn" data-v="paper">📄</button>
+        <button class="rps-btn" data-v="scissors">✂️</button>
+    </div>
+    <button class="action-btn" id="restartBtn" style="display:none">🔄 Play Again</button>
+</div>
+<script>
+    const EMOJIS={rock:'🪨',paper:'📄',scissors:'✂️'};
+    const CHOICES=['rock','paper','scissors'];
+    let scores={you:0,ai:0,draw:0},round=1,total=10;
+    const resultEl=document.getElementById('result'),yourEl=document.getElementById('yourEmoji'),aiEl=document.getElementById('aiEmoji'),roundEl=document.getElementById('round'),restartBtn=document.getElementById('restartBtn');
+
+    function play(choice){
+        if(round>total)return;
+        const ai=CHOICES[Math.floor(Math.random()*3)];
+        yourEl.textContent=EMOJIS[choice]; aiEl.textContent=EMOJIS[ai];
+        let res='';
+        if(choice===ai){scores.draw++;res='🤝 Draw!';}
+        else if((choice==='rock'&&ai==='scissors')||(choice==='paper'&&ai==='rock')||(choice==='scissors'&&ai==='paper')){scores.you++;res='✅ You Win!';}
+        else{scores.ai++;res='❌ AI Wins!';}
+        resultEl.textContent=res;
+        document.getElementById('scoreYou').textContent=scores.you;
+        document.getElementById('scoreDraw').textContent=scores.draw;
+        document.getElementById('scoreAI').textContent=scores.ai;
+        round++;
+        if(round>total){
+            roundEl.textContent='Done!';
+            const winner=scores.you>scores.ai?'🏆 You Win the Match!':scores.ai>scores.you?'🤖 AI Wins the Match!':'🤝 Match Draw!';
+            setTimeout(()=>{resultEl.textContent=winner;restartBtn.style.display='block';},600);
+        }else{roundEl.textContent=round+'/'+total;}
+    }
+
+    document.querySelectorAll('.rps-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>play(btn.dataset.v));
+        btn.addEventListener('touchend',e=>{e.preventDefault();play(btn.dataset.v);},{passive:false});
+    });
+    restartBtn.addEventListener('click',()=>{scores={you:0,ai:0,draw:0};round=1;yourEl.textContent='❓';aiEl.textContent='❓';resultEl.textContent='Choose your move!';document.getElementById('scoreYou').textContent=0;document.getElementById('scoreDraw').textContent=0;document.getElementById('scoreAI').textContent=0;roundEl.textContent='1/10';restartBtn.style.display='none';});
+</script>
+</body></html>

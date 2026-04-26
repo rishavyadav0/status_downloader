@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Tower Stack – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🏗️ Tower Stack</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+    <canvas id="c" class="game-canvas" width="320" height="420"></canvas>
+    <p style="color:#475569;font-size:.82rem;margin-top:10px;text-align:center">Tap / Space to drop block</p>
+</div>
+<script>
+    const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
+    let best=+localStorage.getItem('towerBest')||0; bestEl.textContent=best;
+
+    const BH=22,COLORS=['#6366f1','#8b5cf6','#ec4899','#10b981','#f59e0b','#ef4444','#06b6d4','#84cc16'];
+    let tower,moving,score,state,dir,speed;
+
+    function init(){
+        tower=[{x:W/2-60,w:120,color:COLORS[0]}]; // Base
+        score=0; dir=1; speed=2.5; state='running'; scoreEl.textContent=0;
+        moving={x:0,w:120,color:COLORS[1]};
+        loop();
+    }
+
+    function drop(){
+        if(state!=='running')return;
+        const top=tower[tower.length-1];
+        const left=Math.max(moving.x,top.x);
+        const right=Math.min(moving.x+moving.w,top.x+top.w);
+        const overlap=right-left;
+        if(overlap<=0){state='dead';over();return;}
+        tower.push({x:left,w:overlap,color:moving.color});
+        score++; scoreEl.textContent=score;
+        if(score>best){best=score;localStorage.setItem('towerBest',best);bestEl.textContent=best;}
+        speed=Math.min(5,2.5+score*0.1);
+        moving={x:dir>0?0:W-overlap,w:overlap,color:COLORS[(tower.length)%COLORS.length]};
+    }
+
+    function over(){
+        ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(0,0,W,H);
+        ctx.fillStyle='white'; ctx.textAlign='center';
+        ctx.font='bold 22px Outfit,sans-serif'; ctx.fillText('Tower Fell!',W/2,H/2-14);
+        ctx.font='15px Outfit,sans-serif'; ctx.fillStyle='#94a3b8'; ctx.fillText(`Score: ${score} — Tap to restart`,W/2,H/2+14);
+    }
+
+    function loop(){
+        if(state!=='running'){return;}
+        ctx.clearRect(0,0,W,H);
+        ctx.fillStyle='rgba(15,23,42,0.95)'; ctx.fillRect(0,0,W,H);
+
+        // Scroll tower up
+        const maxBlocks=Math.floor((H-60)/BH);
+        const start=Math.max(0,tower.length-maxBlocks);
+
+        tower.slice(start).forEach((b,i)=>{
+            const y=H-BH*(i+1);
+            ctx.fillStyle=b.color; ctx.beginPath();
+            ctx.roundRect(b.x,y,b.w,BH-3,4); ctx.fill();
+        });
+
+        // Moving block
+        const my=H-BH*(tower.length-start+1)-6;
+        moving.x+=speed*dir;
+        if(moving.x+moving.w>=W){moving.x=W-moving.w;dir=-1;}
+        if(moving.x<=0){moving.x=0;dir=1;}
+        ctx.fillStyle=moving.color; ctx.globalAlpha=0.85;
+        ctx.beginPath(); ctx.roundRect(moving.x,my,moving.w,BH-3,4); ctx.fill();
+        ctx.globalAlpha=1;
+
+        requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener('click',()=>{if(state==='running')drop();else{state='idle';init();}});
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();if(state==='running')drop();else{state='idle';init();}},{passive:false});
+    document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();if(state==='running')drop();else{state='idle';init();}}});
+
+    state='idle'; init();
+</script>
+</body></html>

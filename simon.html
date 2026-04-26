@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Simon Says – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .simon-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:280px;max-width:100%;}
+        .simon-btn{width:130px;height:130px;border-radius:20px;cursor:pointer;border:none;opacity:0.7;transition:opacity .1s,transform .1s;-webkit-tap-highlight-color:transparent;}
+        .simon-btn.flash{opacity:1;transform:scale(1.06);}
+        .simon-btn:active{opacity:1;}
+        .s0{background:#ef4444;} .s1{background:#10b981;} .s2{background:#f59e0b;} .s3{background:#6366f1;}
+        .simon-status{font-size:1.1rem;font-weight:600;color:#e2e8f0;margin:16px 0 8px;text-align:center;}
+        .simon-level{font-size:2rem;font-weight:800;color:#f1f5f9;margin-bottom:16px;text-align:center;}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🎨 Simon Says</h2></div>
+    <div class="simon-level" id="level">Level 0</div>
+    <div class="simon-status" id="status">Press Start to Play</div>
+    <div class="simon-grid">
+        <button class="simon-btn s0" data-i="0"></button>
+        <button class="simon-btn s1" data-i="1"></button>
+        <button class="simon-btn s2" data-i="2"></button>
+        <button class="simon-btn s3" data-i="3"></button>
+    </div>
+    <button class="action-btn" id="startBtn" style="margin-top:20px">▶ Start</button>
+</div>
+<script>
+    const btns=[...document.querySelectorAll('.simon-btn')];
+    const statusEl=document.getElementById('status'),levelEl=document.getElementById('level'),startBtn=document.getElementById('startBtn');
+    let seq=[],playerSeq=[],locked=false,best=+localStorage.getItem('simonBest')||0;
+
+    function flash(i,dur=400){
+        return new Promise(res=>{btns[i].classList.add('flash');setTimeout(()=>{btns[i].classList.remove('flash');setTimeout(res,80);},dur);});
+    }
+
+    async function showSeq(){
+        locked=true; statusEl.textContent='Watch the pattern...';
+        for(let i of seq){await flash(i,450);await new Promise(r=>setTimeout(r,100));}
+        locked=false; playerSeq=[]; statusEl.textContent='Your turn! Repeat the pattern';
+    }
+
+    function nextRound(){
+        seq.push(Math.floor(Math.random()*4));
+        levelEl.textContent='Level '+seq.length;
+        setTimeout(showSeq,600);
+    }
+
+    btns.forEach(btn=>{
+        const handle=()=>{
+            if(locked)return;
+            const i=+btn.dataset.i;
+            flash(i,200);
+            playerSeq.push(i);
+            const pos=playerSeq.length-1;
+            if(playerSeq[pos]!==seq[pos]){
+                locked=true;
+                if(seq.length-1>best){best=seq.length-1;localStorage.setItem('simonBest',best);}
+                statusEl.textContent=`❌ Wrong! You reached level ${seq.length}. Best: ${best}`;
+                startBtn.textContent='Play Again'; startBtn.style.display='block'; return;
+            }
+            if(playerSeq.length===seq.length){statusEl.textContent='✅ Correct! Get ready...';nextRound();}
+        };
+        btn.addEventListener('click',handle);
+        btn.addEventListener('touchend',e=>{e.preventDefault();handle();},{passive:false});
+    });
+
+    startBtn.addEventListener('click',()=>{seq=[];playerSeq=[];startBtn.style.display='none';nextRound();});
+</script>
+</body></html>

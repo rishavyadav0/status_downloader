@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Flappy Bird – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🐦 Flappy Bird</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+    <canvas id="c" class="game-canvas" width="340" height="480"></canvas>
+    <p style="color:#475569;font-size:.82rem;margin-top:10px;text-align:center">Tap / Space to flap</p>
+</div>
+<script>
+    const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+    const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
+    let best=+localStorage.getItem('flappyBest')||0; bestEl.textContent=best;
+    const GAP=120,PW=52,BIRD_R=16;
+    let bird,pipes,score,raf,state='idle';
+
+    function init(){
+        bird={x:70,y:canvas.height/2,vy:0};
+        pipes=[]; score=0; scoreEl.textContent=0;
+        state='running';
+    }
+
+    function flap(){
+        if(state==='idle'||state==='dead'){init();}
+        if(state==='running') bird.vy=-7;
+    }
+
+    function addPipe(){
+        const top=60+Math.random()*(canvas.height-GAP-120);
+        pipes.push({x:canvas.width,top,scored:false});
+    }
+
+    function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        // Sky gradient
+        const sky=ctx.createLinearGradient(0,0,0,canvas.height);
+        sky.addColorStop(0,'#0f172a'); sky.addColorStop(1,'#1e3a5f');
+        ctx.fillStyle=sky; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        if(state==='idle'){
+            ctx.fillStyle='rgba(255,255,255,.15)'; ctx.textAlign='center'; ctx.font='bold 18px Outfit,sans-serif';
+            ctx.fillText('🐦 Tap to Start!',canvas.width/2,canvas.height/2);
+            drawBird();
+            requestAnimationFrame(draw); return;
+        }
+
+        // Physics
+        bird.vy+=0.38; bird.y+=bird.vy;
+
+        // Pipes
+        if(pipes.length===0||pipes[pipes.length-1].x<canvas.width-180) addPipe();
+        pipes.forEach((p,i)=>{
+            p.x-=3;
+            // Top pipe
+            ctx.fillStyle='#10b981'; ctx.beginPath(); ctx.roundRect(p.x,0,PW,p.top,4); ctx.fill();
+            ctx.fillStyle='#059669'; ctx.fillRect(p.x-4,p.top-20,PW+8,20);
+            // Bottom pipe
+            const bot=p.top+GAP;
+            ctx.fillStyle='#10b981'; ctx.beginPath(); ctx.roundRect(p.x,bot,PW,canvas.height-bot,4); ctx.fill();
+            ctx.fillStyle='#059669'; ctx.fillRect(p.x-4,bot,PW+8,20);
+            // Score
+            if(!p.scored&&bird.x>p.x+PW){p.scored=true;score++;scoreEl.textContent=score;}
+            // Collision
+            if(bird.x+BIRD_R>p.x+4&&bird.x-BIRD_R<p.x+PW-4&&(bird.y-BIRD_R<p.top||bird.y+BIRD_R>bot)){state='dead';}
+            if(p.x+PW<0)pipes.splice(i,1);
+        });
+
+        // Ground/ceiling
+        if(bird.y+BIRD_R>canvas.height||bird.y-BIRD_R<0) state='dead';
+
+        if(state==='dead'){
+            if(score>best){best=score;localStorage.setItem('flappyBest',best);bestEl.textContent=best;}
+            ctx.fillStyle='rgba(0,0,0,.65)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle='white'; ctx.textAlign='center';
+            ctx.font='bold 24px Outfit,sans-serif'; ctx.fillText('💀 Game Over!',canvas.width/2,canvas.height/2-14);
+            ctx.font='15px Outfit,sans-serif'; ctx.fillStyle='#94a3b8'; ctx.fillText('Tap to restart',canvas.width/2,canvas.height/2+16);
+            drawBird(); return;
+        }
+
+        drawBird();
+        // Score HUD
+        ctx.fillStyle='rgba(255,255,255,.8)'; ctx.textAlign='left'; ctx.font='bold 16px Outfit,sans-serif';
+        ctx.fillText(score,12,28);
+        raf=requestAnimationFrame(draw);
+    }
+
+    function drawBird(){
+        ctx.save(); ctx.translate(bird.x,bird.y); ctx.rotate(Math.min(Math.max(bird.vy*.04,-0.5),0.5));
+        ctx.font='28px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('🐦',0,0);
+        ctx.restore();
+    }
+
+    canvas.addEventListener('click',flap);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();flap();},{passive:false});
+    document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap();}});
+    draw();
+</script>
+</body></html>

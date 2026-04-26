@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>2048 – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .g2048 { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:320px; max-width:100%; background:rgba(0,0,0,0.3); border-radius:14px; padding:10px; }
+        .tile { width:70px; height:70px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:800; color:#0f172a; transition:background .1s; }
+        .t0{background:rgba(255,255,255,0.05);color:transparent;}
+        .t2{background:#fef9c3;} .t4{background:#fde68a;} .t8{background:#f59e0b;color:#fff;}
+        .t16{background:#fb923c;color:#fff;} .t32{background:#ef4444;color:#fff;}
+        .t64{background:#dc2626;color:#fff;} .t128{background:#a78bfa;color:#fff;font-size:1.2rem;}
+        .t256{background:#8b5cf6;color:#fff;font-size:1.1rem;} .t512{background:#6366f1;color:#fff;font-size:1rem;}
+        .t1024{background:#10b981;color:#fff;font-size:.85rem;} .t2048{background:#34d399;color:#fff;font-size:.85rem;}
+        .thigh{background:#0f172a;color:#34d399;font-size:.75rem;}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🔢 2048</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+    <div class="g2048" id="board"></div>
+    <button class="action-btn" id="restartBtn" style="margin-top:16px">🔄 New Game</button>
+    <p style="color:#475569;font-size:.8rem;margin-top:10px;text-align:center">Swipe or use Arrow Keys</p>
+</div>
+<script>
+    let grid,score,best=+localStorage.getItem('2048Best')||0;
+    const boardEl=document.getElementById('board'),scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
+    bestEl.textContent=best;
+    function newGrid(){return Array.from({length:4},()=>Array(4).fill(0));}
+    function addTile(g){
+        const empty=[];
+        for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(!g[r][c])empty.push([r,c]);
+        if(!empty.length)return;
+        const[r,c]=empty[Math.floor(Math.random()*empty.length)];
+        g[r][c]=Math.random()<.9?2:4;
+    }
+    function render(){
+        boardEl.innerHTML='';
+        grid.forEach(row=>row.forEach(v=>{
+            const d=document.createElement('div');
+            const cls=v>=2048?'thigh':'t'+v;
+            d.className='tile '+cls; d.textContent=v||'';
+            boardEl.appendChild(d);
+        }));
+    }
+    function slide(row){
+        let a=row.filter(x=>x);
+        for(let i=0;i<a.length-1;i++){if(a[i]===a[i+1]){a[i]*=2;score+=a[i];a.splice(i+1,1);}}
+        while(a.length<4)a.push(0);return a;
+    }
+    function move(dir){
+        let moved=false;
+        const g=grid.map(r=>[...r]);
+        if(dir==='l'||dir==='r'){
+            for(let r=0;r<4;r++){const s=dir==='l'?slide(g[r]):slide([...g[r]].reverse()).reverse();s.forEach((v,c)=>{if(g[r][c]!==v)moved=true;g[r][c]=v;});}
+        }else{
+            for(let c=0;c<4;c++){
+                let col=g.map(r=>r[c]);
+                const s=dir==='u'?slide(col):slide([...col].reverse()).reverse();
+                s.forEach((v,r)=>{if(g[r][c]!==v)moved=true;g[r][c]=v;});
+            }
+        }
+        if(!moved)return;
+        grid=g; addTile(grid);
+        scoreEl.textContent=score; if(score>best){best=score;localStorage.setItem('2048Best',best);bestEl.textContent=best;}
+        render();
+    }
+    function init(){grid=newGrid();score=0;scoreEl.textContent=0;addTile(grid);addTile(grid);render();}
+    document.addEventListener('keydown',e=>{
+        const map={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'};
+        if(map[e.key]){e.preventDefault();move(map[e.key]);}
+    });
+    let tx=0,ty=0;
+    document.getElementById('board').addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+    document.getElementById('board').addEventListener('touchend',e=>{
+        const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+        if(Math.abs(dx)>Math.abs(dy)){move(dx>0?'r':'l');}else{move(dy>0?'d':'u');}
+    });
+    document.getElementById('restartBtn').addEventListener('click',init);
+    init();
+</script>
+</body></html>

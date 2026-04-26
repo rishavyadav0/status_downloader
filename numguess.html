@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Number Guess – Game Zone</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+<style>
+.ng-range{font-size:.9rem;color:#64748b;margin-bottom:8px;text-align:center;}
+.ng-input{background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 20px;width:200px;color:#f1f5f9;font-size:1.5rem;font-weight:800;text-align:center;font-family:'Outfit',sans-serif;outline:none;-webkit-appearance:none;}
+.ng-input:focus{border-color:#6366f1;}
+.ng-feedback{font-size:2rem;margin:12px 0;min-height:44px;text-align:center;}
+.ng-hint{font-size:1.1rem;font-weight:700;color:#e2e8f0;text-align:center;min-height:28px;}
+.ng-tries{color:#64748b;font-size:.9rem;text-align:center;}
+</style></head>
+<body><div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+<div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🔮 Number Guess</h2></div>
+<div class="score-row"><div class="score-pill">Best: <span id="best">—</span> tries</div><div class="score-pill">Wins: <span id="wins">0</span></div></div>
+<p class="ng-range">I'm thinking of a number between <b>1 and 100</b></p>
+<div class="ng-feedback" id="feedback">🤔</div>
+<div class="ng-hint" id="hint">Enter your guess!</div>
+<p class="ng-tries">Tries: <span id="tries">0</span></p>
+<br>
+<input class="ng-input" id="inp" type="number" min="1" max="100" placeholder="?">
+<br><br>
+<button class="action-btn" id="guessBtn">Guess!</button>
+<button class="action-btn" id="restartBtn" style="display:none;background:rgba(255,255,255,0.1)">New Game</button>
+</div>
+<script>
+let secret,tries,best=localStorage.getItem('ngBest')?+localStorage.getItem('ngBest'):null,wins=0;
+const inpEl=document.getElementById('inp'),feedEl=document.getElementById('feedback'),hintEl=document.getElementById('hint'),triesEl=document.getElementById('tries'),bestEl=document.getElementById('best'),winsEl=document.getElementById('wins'),guessBtn=document.getElementById('guessBtn'),restartBtn=document.getElementById('restartBtn');
+bestEl.textContent=best??'—';
+function init(){secret=Math.floor(Math.random()*100)+1;tries=0;feedEl.textContent='🤔';hintEl.textContent='Enter your guess!';triesEl.textContent=0;inpEl.value='';inpEl.disabled=false;guessBtn.style.display='block';restartBtn.style.display='none';}
+function guess(){
+  const v=+inpEl.value;
+  if(!v||v<1||v>100){hintEl.textContent='Enter a number between 1-100!';return;}
+  tries++;triesEl.textContent=tries;
+  if(v===secret){
+    feedEl.textContent='🎉';hintEl.textContent=`Correct in ${tries} tries!`;wins++;winsEl.textContent=wins;
+    if(best===null||tries<best){best=tries;localStorage.setItem('ngBest',best);bestEl.textContent=best;}
+    inpEl.disabled=true;guessBtn.style.display='none';restartBtn.style.display='block';
+  }else if(v<secret){feedEl.textContent='⬆️';hintEl.textContent='Too Low! Go Higher';}
+  else{feedEl.textContent='⬇️';hintEl.textContent='Too High! Go Lower';}
+  inpEl.value='';
+}
+guessBtn.addEventListener('click',guess);
+inpEl.addEventListener('keydown',e=>{if(e.key==='Enter')guess();});
+restartBtn.addEventListener('click',init);
+init();
+</script></body></html>

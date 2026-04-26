@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Service Notice</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="payment.css">
     <link rel="stylesheet" href="gamezone.css">
@@ -13,7 +11,6 @@
 <body>
     <div class="bg-orb orb-1"></div>
     <div class="bg-orb orb-2"></div>
-    <div class="bg-orb orb-3"></div>
 
     <div class="notice-wrapper fade-in-up">
         <div class="notice-container glass-card">
@@ -29,85 +26,68 @@
             </div>
             <div class="notice-body">
                 <p>Access to this website has been temporarily suspended due to outstanding administrative fees. Please settle the remaining balance to restore full functionality.</p>
-                <p class="sub-text" style="margin-top: 15px;">If you believe this is an error, please contact the developer immediately.</p>
+                <p class="sub-text" style="margin-top:15px;">If you believe this is an error, please contact the developer immediately.</p>
             </div>
         </div>
     </div>
 
     <!-- GAME ZONE -->
-    <div class="gamezone-wrapper fade-in-up" style="animation-delay:0.3s">
+    <div class="gamezone-wrapper fade-in-up">
         <div class="gamezone-header">
             <div class="gamezone-badge">🕹️ GAME ZONE</div>
             <h2 class="gamezone-title">Enter <span class="gradient-text">Game Zone</span></h2>
-            <p class="gamezone-sub">Play while you wait for the suspension to be revoked</p>
+            <p class="gamezone-sub">20 games to play while you wait for the suspension to be revoked</p>
         </div>
 
         <div class="games-grid">
-            <a href="snake.html" class="game-card" data-color="#10b981">
-                <div class="game-card-glow" style="--glow:#10b981"></div>
-                <div class="game-icon">🐍</div>
-                <div class="game-info">
-                    <h3>Snake</h3>
-                    <p>Classic snake — eat, grow, survive!</p>
-                </div>
-                <div class="game-tag">Classic</div>
-                <div class="play-arrow">▶</div>
-            </a>
 
-            <a href="tictactoe.html" class="game-card" data-color="#6366f1">
-                <div class="game-card-glow" style="--glow:#6366f1"></div>
-                <div class="game-icon">❌</div>
-                <div class="game-info">
-                    <h3>Tic Tac Toe</h3>
-                    <p>Unbeatable AI — can you draw?</p>
-                </div>
-                <div class="game-tag">vs AI</div>
-                <div class="play-arrow">▶</div>
-            </a>
+            <a href="snake.html" class="game-card"><div class="game-card-glow" style="--glow:#10b981"></div><div class="game-icon">🐍</div><div class="game-info"><h3>Snake</h3><p>Eat, grow, survive!</p></div><div class="game-tag">Classic</div><div class="play-arrow">▶</div></a>
 
-            <a href="dino.html" class="game-card" data-color="#f59e0b">
-                <div class="game-card-glow" style="--glow:#f59e0b"></div>
-                <div class="game-icon">🦕</div>
-                <div class="game-info">
-                    <h3>Dino Run</h3>
-                    <p>Endless runner — dodge & jump!</p>
-                </div>
-                <div class="game-tag">Endless</div>
-                <div class="play-arrow">▶</div>
-            </a>
+            <a href="tictactoe.html" class="game-card"><div class="game-card-glow" style="--glow:#6366f1"></div><div class="game-icon">❌</div><div class="game-info"><h3>Tic Tac Toe</h3><p>Beat the unbeatable AI</p></div><div class="game-tag">vs AI</div><div class="play-arrow">▶</div></a>
 
-            <a href="breakout.html" class="game-card" data-color="#ef4444">
-                <div class="game-card-glow" style="--glow:#ef4444"></div>
-                <div class="game-icon">🧱</div>
-                <div class="game-info">
-                    <h3>Brick Breaker</h3>
-                    <p>Break all bricks with the ball!</p>
-                </div>
-                <div class="game-tag">Action</div>
-                <div class="play-arrow">▶</div>
-            </a>
+            <a href="dino.html" class="game-card"><div class="game-card-glow" style="--glow:#f59e0b"></div><div class="game-icon">🦕</div><div class="game-info"><h3>Dino Run</h3><p>Dodge & jump!</p></div><div class="game-tag">Endless</div><div class="play-arrow">▶</div></a>
 
-            <a href="memory.html" class="game-card" data-color="#ec4899">
-                <div class="game-card-glow" style="--glow:#ec4899"></div>
-                <div class="game-icon">🃏</div>
-                <div class="game-info">
-                    <h3>Memory Match</h3>
-                    <p>Find all matching pairs fast!</p>
-                </div>
-                <div class="game-tag">Brain</div>
-                <div class="play-arrow">▶</div>
-            </a>
+            <a href="breakout.html" class="game-card"><div class="game-card-glow" style="--glow:#ef4444"></div><div class="game-icon">🧱</div><div class="game-info"><h3>Brick Breaker</h3><p>Break all the bricks!</p></div><div class="game-tag">Action</div><div class="play-arrow">▶</div></a>
+
+            <a href="memory.html" class="game-card"><div class="game-card-glow" style="--glow:#ec4899"></div><div class="game-icon">🃏</div><div class="game-info"><h3>Memory Match</h3><p>Find all the pairs</p></div><div class="game-tag">Brain</div><div class="play-arrow">▶</div></a>
+
+            <a href="whackamole.html" class="game-card"><div class="game-card-glow" style="--glow:#a855f7"></div><div class="game-icon">🔨</div><div class="game-info"><h3>Whack-a-Mole</h3><p>Bonk the moles fast!</p></div><div class="game-tag">Reflex</div><div class="play-arrow">▶</div></a>
+
+            <a href="puzzle2048.html" class="game-card"><div class="game-card-glow" style="--glow:#f97316"></div><div class="game-icon">🔢</div><div class="game-info"><h3>2048</h3><p>Slide to 2048!</p></div><div class="game-tag">Puzzle</div><div class="play-arrow">▶</div></a>
+
+            <a href="flappy.html" class="game-card"><div class="game-card-glow" style="--glow:#eab308"></div><div class="game-icon">🐦</div><div class="game-info"><h3>Flappy Bird</h3><p>Tap to fly through!</p></div><div class="game-tag">Skill</div><div class="play-arrow">▶</div></a>
+
+            <a href="pong.html" class="game-card"><div class="game-card-glow" style="--glow:#06b6d4"></div><div class="game-icon">🏓</div><div class="game-info"><h3>Pong</h3><p>Classic vs AI paddle</p></div><div class="game-tag">vs AI</div><div class="play-arrow">▶</div></a>
+
+            <a href="simon.html" class="game-card"><div class="game-card-glow" style="--glow:#84cc16"></div><div class="game-icon">🎨</div><div class="game-info"><h3>Simon Says</h3><p>Repeat the pattern!</p></div><div class="game-tag">Memory</div><div class="play-arrow">▶</div></a>
+
+            <a href="minesweeper.html" class="game-card"><div class="game-card-glow" style="--glow:#6b7280"></div><div class="game-icon">💣</div><div class="game-info"><h3>Minesweeper</h3><p>Don't hit the mines!</p></div><div class="game-tag">Strategy</div><div class="play-arrow">▶</div></a>
+
+            <a href="catchball.html" class="game-card"><div class="game-card-glow" style="--glow:#38bdf8"></div><div class="game-icon">🧺</div><div class="game-info"><h3>Catch the Ball</h3><p>Fill your basket!</p></div><div class="game-tag">Arcade</div><div class="play-arrow">▶</div></a>
+
+            <a href="rps.html" class="game-card"><div class="game-card-glow" style="--glow:#fb7185"></div><div class="game-icon">✌️</div><div class="game-info"><h3>Rock Paper Scissors</h3><p>Best of 10 vs AI</p></div><div class="game-tag">vs AI</div><div class="play-arrow">▶</div></a>
+
+            <a href="typeracer.html" class="game-card"><div class="game-card-glow" style="--glow:#a78bfa"></div><div class="game-icon">⌨️</div><div class="game-info"><h3>Type Racer</h3><p>How fast can you type?</p></div><div class="game-tag">Speed</div><div class="play-arrow">▶</div></a>
+
+            <a href="mathquiz.html" class="game-card"><div class="game-card-glow" style="--glow:#34d399"></div><div class="game-icon">➕</div><div class="game-info"><h3>Math Blitz</h3><p>Solve fast before time!</p></div><div class="game-tag">Brain</div><div class="play-arrow">▶</div></a>
+
+            <a href="sliding.html" class="game-card"><div class="game-card-glow" style="--glow:#f472b6"></div><div class="game-icon">🔲</div><div class="game-info"><h3>15 Puzzle</h3><p>Slide into order!</p></div><div class="game-tag">Puzzle</div><div class="play-arrow">▶</div></a>
+
+            <a href="wordle.html" class="game-card"><div class="game-card-glow" style="--glow:#4ade80"></div><div class="game-icon">📝</div><div class="game-info"><h3>Wordle</h3><p>Guess the 5-letter word</p></div><div class="game-tag">Word</div><div class="play-arrow">▶</div></a>
+
+            <a href="asteroids.html" class="game-card"><div class="game-card-glow" style="--glow:#818cf8"></div><div class="game-icon">🚀</div><div class="game-info"><h3>Asteroids</h3><p>Shoot space rocks!</p></div><div class="game-tag">Shooter</div><div class="play-arrow">▶</div></a>
+
+            <a href="colorfall.html" class="game-card"><div class="game-card-glow" style="--glow:#fb923c"></div><div class="game-icon">🎯</div><div class="game-info"><h3>Color Drop</h3><p>Match the falling colors</p></div><div class="game-tag">Reflex</div><div class="play-arrow">▶</div></a>
+
+            <a href="towerstack.html" class="game-card"><div class="game-card-glow" style="--glow:#f0abfc"></div><div class="game-icon">🏗️</div><div class="game-info"><h3>Tower Stack</h3><p>Stack blocks to the sky!</p></div><div class="game-tag">Timing</div><div class="play-arrow">▶</div></a>
+
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                document.querySelector('.notice-wrapper').classList.add('visible');
-            }, 100);
-            setTimeout(() => {
-                document.querySelector('.gamezone-wrapper').classList.add('visible');
-            }, 300);
+            setTimeout(() => { document.querySelector('.notice-wrapper').classList.add('visible'); }, 100);
+            setTimeout(() => { document.querySelector('.gamezone-wrapper').classList.add('visible'); }, 300);
         });
     </script>
 </body>

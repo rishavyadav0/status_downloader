@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Math Blitz – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .math-question{font-size:3rem;font-weight:800;color:#f1f5f9;text-align:center;margin:20px 0;letter-spacing:.04em;}
+        .math-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:300px;max-width:100%;}
+        .math-opt{padding:18px;border-radius:14px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.1);font-size:1.4rem;font-weight:800;color:#f1f5f9;cursor:pointer;transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent;}
+        .math-opt:active{transform:scale(.94);}
+        .math-opt.correct{background:rgba(16,185,129,0.25);border-color:#10b981;}
+        .math-opt.wrong{background:rgba(239,68,68,0.25);border-color:#ef4444;}
+        .timer-bar{width:300px;max-width:100%;height:8px;background:rgba(255,255,255,0.08);border-radius:99px;overflow:hidden;margin-bottom:16px;}
+        .timer-fill{height:100%;background:linear-gradient(90deg,#10b981,#6366f1);border-radius:99px;transition:width .05s linear;}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">➕ Math Blitz</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Streak: <span id="streak">0</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+    <div class="timer-bar"><div class="timer-fill" id="fill" style="width:100%"></div></div>
+    <div class="math-question" id="question">?</div>
+    <div class="math-options" id="options"></div>
+    <button class="action-btn" id="startBtn" style="margin-top:20px">▶ Start Game</button>
+</div>
+<script>
+    let score,streak,best=+localStorage.getItem('mathBest')||0,timeLeft,timer,running=false,locked=false;
+    const questionEl=document.getElementById('question'),optionsEl=document.getElementById('options'),scoreEl=document.getElementById('score'),streakEl=document.getElementById('streak'),bestEl=document.getElementById('best'),fill=document.getElementById('fill'),startBtn=document.getElementById('startBtn');
+    bestEl.textContent=best; const TIME_PER_Q=8;
+
+    function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+    function genQ(){
+        const ops=['+','-','×'];
+        const op=ops[Math.floor(Math.random()*ops.length)];
+        let a,b,ans;
+        if(op==='+'){a=randInt(1,50);b=randInt(1,50);ans=a+b;}
+        else if(op==='-'){a=randInt(10,99);b=randInt(1,a);ans=a-b;}
+        else{a=randInt(2,12);b=randInt(2,12);ans=a*b;}
+        const wrongs=new Set();
+        while(wrongs.size<3){const w=ans+randInt(-15,15);if(w!==ans&&w>0)wrongs.add(w);}
+        const choices=[ans,...wrongs].sort(()=>Math.random()-.5);
+        return{text:`${a} ${op} ${b}`,ans,choices};
+    }
+
+    function nextQ(){
+        locked=false;
+        const q=genQ();
+        questionEl.textContent=q.text+' = ?';
+        timeLeft=TIME_PER_Q;
+        fill.style.transition='none'; fill.style.width='100%';
+        setTimeout(()=>{fill.style.transition='width .05s linear';},20);
+        clearInterval(timer);
+        timer=setInterval(()=>{
+            timeLeft-=0.05; fill.style.width=(timeLeft/TIME_PER_Q*100)+'%';
+            if(timeLeft<=0){clearInterval(timer);if(!locked){locked=true;streak=0;streakEl.textContent=0;highlightWrong(-1,q.ans);setTimeout(nextQ,800);}}
+        },50);
+
+        optionsEl.innerHTML='';
+        q.choices.forEach(v=>{
+            const btn=document.createElement('button');
+            btn.className='math-opt'; btn.textContent=v;
+            const handle=()=>{
+                if(locked)return; locked=true; clearInterval(timer);
+                if(v===q.ans){score+=10+streak*2;streak++;scoreEl.textContent=score;streakEl.textContent=streak;if(score>best){best=score;localStorage.setItem('mathBest',best);bestEl.textContent=best;}btn.classList.add('correct');setTimeout(nextQ,500);}
+                else{streak=0;streakEl.textContent=0;btn.classList.add('wrong');highlightWrong(v,q.ans);setTimeout(nextQ,800);}
+            };
+            btn.addEventListener('click',handle);
+            btn.addEventListener('touchend',e=>{e.preventDefault();handle();},{passive:false});
+            optionsEl.appendChild(btn);
+        });
+    }
+
+    function highlightWrong(wrong,correct){
+        [...optionsEl.children].forEach(b=>{if(+b.textContent===correct)b.classList.add('correct');});
+    }
+
+    startBtn.addEventListener('click',()=>{startBtn.style.display='none';score=0;streak=0;scoreEl.textContent=0;streakEl.textContent=0;running=true;nextQ();});
+</script>
+</body></html>

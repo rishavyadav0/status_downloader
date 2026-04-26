@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>15 Puzzle – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+    <style>
+        .puzzle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(300px,92vw);max-width:100%;}
+        .p-tile{aspect-ratio:1;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.4));border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#f1f5f9;cursor:pointer;transition:transform .1s,background .1s;-webkit-tap-highlight-color:transparent;user-select:none;}
+        .p-tile:active{transform:scale(.92);}
+        .p-tile.empty{background:rgba(0,0,0,0.2);border-color:rgba(255,255,255,0.04);cursor:default;}
+        .p-tile.correct{background:linear-gradient(135deg,rgba(16,185,129,0.4),rgba(52,211,153,0.4));border-color:rgba(16,185,129,0.3);}
+    </style>
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🔲 15 Puzzle</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Moves: <span id="moves">0</span></div>
+        <div class="score-pill">Best: <span id="best">—</span></div>
+        <div class="score-pill" id="statusPill">Shuffling…</div>
+    </div>
+    <div class="puzzle-grid" id="grid"></div>
+    <button class="action-btn" id="restartBtn" style="margin-top:16px">🔀 New Game</button>
+</div>
+<script>
+    let tiles,blank,moves,best=localStorage.getItem('puzzleBest')?+localStorage.getItem('puzzleBest'):null;
+    const gridEl=document.getElementById('grid'),movesEl=document.getElementById('moves'),bestEl=document.getElementById('best'),statusEl=document.getElementById('statusPill');
+    bestEl.textContent=best??'—';
+
+    function isSolvable(arr){
+        let inv=0;
+        for(let i=0;i<15;i++)for(let j=i+1;j<16;j++)if(arr[i]&&arr[j]&&arr[i]>arr[j])inv++;
+        const blankRow=Math.floor(arr.indexOf(0)/4);
+        return (inv+blankRow)%2===0;
+    }
+
+    function shuffle(){
+        let arr=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+        do{arr.sort(()=>Math.random()-.5);}while(!isSolvable(arr));
+        return arr;
+    }
+
+    function init(){
+        tiles=shuffle(); blank=tiles.indexOf(0); moves=0; movesEl.textContent=0; statusEl.textContent='Playing'; render();
+    }
+
+    function canMove(i){
+        const r=Math.floor(i/4),c=i%4,br=Math.floor(blank/4),bc=blank%4;
+        return (r===br&&Math.abs(c-bc)===1)||(c===bc&&Math.abs(r-br)===1);
+    }
+
+    function move(i){
+        if(!canMove(i))return;
+        tiles[blank]=tiles[i]; tiles[i]=0; blank=i; moves++; movesEl.textContent=moves;
+        render();
+        if(tiles.every((v,i)=>v===(i===15?0:i+1))){
+            statusEl.textContent='🎉 Solved!';
+            if(best===null||moves<best){best=moves;localStorage.setItem('puzzleBest',best);bestEl.textContent=best;}
+        }
+    }
+
+    function render(){
+        gridEl.innerHTML='';
+        tiles.forEach((v,i)=>{
+            const d=document.createElement('div');
+            d.className='p-tile'+(v===0?' empty':'')+(v&&v===i+1?' correct':'');
+            d.textContent=v||'';
+            d.addEventListener('click',()=>move(i));
+            d.addEventListener('touchend',e=>{e.preventDefault();move(i);},{passive:false});
+            gridEl.appendChild(d);
+        });
+    }
+
+    document.getElementById('restartBtn').addEventListener('click',init);
+    init();
+</script>
+</body></html>

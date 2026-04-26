@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <title>Catch the Ball – Game Zone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+</head>
+<body>
+<div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+    <div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🧺 Catch the Ball</h2></div>
+    <div class="score-row">
+        <div class="score-pill">Score: <span id="score">0</span></div>
+        <div class="score-pill">Lives: <span id="lives">3</span></div>
+        <div class="score-pill">Best: <span id="best">0</span></div>
+    </div>
+    <canvas id="c" class="game-canvas" width="340" height="420" style="touch-action:none"></canvas>
+    <p style="color:#475569;font-size:.82rem;margin-top:10px;text-align:center">Slide/drag to move basket</p>
+</div>
+<script>
+    const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives'),bestEl=document.getElementById('best');
+    let best=+localStorage.getItem('catchBest')||0; bestEl.textContent=best;
+    const BASKET_W=70,BASKET_H=20,BALL_R=12;
+    const EMOJIS=['⚽','🍎','💎','🌟','🍊','🎸','🔮'];
+    let basket,balls,score,lives,raf,running=false;
+
+    function init(){
+        basket={x:W/2-BASKET_W/2,y:H-36};
+        balls=[]; score=0; lives=3; running=true;
+        scoreEl.textContent=0; livesEl.textContent=3;
+        if(raf)cancelAnimationFrame(raf);
+        spawn(); loop();
+    }
+
+    function spawn(){
+        if(!running)return;
+        balls.push({x:Math.random()*(W-BALL_R*2)+BALL_R,y:-BALL_R,vy:2.5+score*0.04,emoji:EMOJIS[Math.floor(Math.random()*EMOJIS.length)]});
+        setTimeout(spawn,Math.max(600,1200-score*10));
+    }
+
+    function loop(){
+        ctx.clearRect(0,0,W,H);
+        balls.forEach((b,i)=>{
+            b.y+=b.vy;
+            ctx.font='22px serif'; ctx.textAlign='center'; ctx.fillText(b.emoji,b.x,b.y);
+            // Catch
+            if(b.y+BALL_R>=basket.y&&b.y-BALL_R<=basket.y+BASKET_H&&b.x>basket.x&&b.x<basket.x+BASKET_W){
+                balls.splice(i,1); score++; scoreEl.textContent=score;
+                if(score>best){best=score;localStorage.setItem('catchBest',best);bestEl.textContent=best;}
+                return;
+            }
+            // Missed
+            if(b.y-BALL_R>H){
+                balls.splice(i,1); lives--; livesEl.textContent=lives;
+                if(lives<=0){
+                    running=false;
+                    ctx.fillStyle='rgba(0,0,0,.7)'; ctx.fillRect(0,0,W,H);
+                    ctx.fillStyle='white'; ctx.textAlign='center';
+                    ctx.font='bold 22px Outfit,sans-serif'; ctx.fillText('Game Over!',W/2,H/2-14);
+                    ctx.font='15px Outfit,sans-serif'; ctx.fillStyle='#94a3b8'; ctx.fillText('Tap to restart',W/2,H/2+14);
+                }
+            }
+        });
+        // Basket
+        const grad=ctx.createLinearGradient(basket.x,0,basket.x+BASKET_W,0);
+        grad.addColorStop(0,'#6366f1'); grad.addColorStop(1,'#8b5cf6');
+        ctx.fillStyle=grad; ctx.beginPath(); ctx.roundRect(basket.x,basket.y,BASKET_W,BASKET_H,6); ctx.fill();
+        ctx.font='20px serif'; ctx.textAlign='center'; ctx.fillText('🧺',basket.x+BASKET_W/2,basket.y+BASKET_H+12);
+        if(!running)return;
+        raf=requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener('mousemove',e=>{const r=canvas.getBoundingClientRect();basket.x=Math.max(0,Math.min(W-BASKET_W,e.clientX-r.left-BASKET_W/2));});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();basket.x=Math.max(0,Math.min(W-BASKET_W,e.touches[0].clientX-r.left-BASKET_W/2));},{passive:false});
+    canvas.addEventListener('click',()=>{if(!running)init();});
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();if(!running)init();},{passive:false});
+    init();
+</script>
+</body></html>

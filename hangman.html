@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Hangman – Game Zone</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="payment.css"><link rel="stylesheet" href="gamezone.css">
+<style>
+.hm-word{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+.hm-letter{width:36px;height:44px;border-bottom:3px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#f1f5f9;}
+.hm-keyboard{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:340px;}
+.hm-key{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.12);color:#f1f5f9;font-weight:700;font-size:.9rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.hm-key:disabled{opacity:.3;cursor:default;}
+.hm-key.correct{background:rgba(16,185,129,0.4);border-color:#10b981;}
+.hm-key.wrong{background:rgba(239,68,68,0.3);border-color:#ef4444;}
+.hm-figure{font-size:5rem;text-align:center;margin:8px 0;min-height:80px;}
+.hm-hint{color:#64748b;font-size:.85rem;margin-bottom:8px;}
+</style></head>
+<body><div class="bg-orb orb-1"></div><div class="bg-orb orb-2"></div>
+<div class="game-page-wrapper fade-in-up visible">
+<div class="game-page-header"><a href="index.html" class="back-btn">← Back</a><h2 class="game-page-title">🪢 Hangman</h2></div>
+<div class="score-row"><div class="score-pill">Wins: <span id="wins">0</span></div><div class="score-pill">Wrong: <span id="wrong">0</span>/6</div></div>
+<div class="hm-figure" id="figure">😊</div>
+<p class="hm-hint" id="hint"></p>
+<div class="hm-word" id="wordDisplay"></div>
+<div class="hm-keyboard" id="keyboard"></div>
+<div style="color:#e2e8f0;font-size:1rem;font-weight:600;text-align:center;min-height:28px;margin:12px 0" id="status"></div>
+<button class="action-btn" id="nextBtn" style="display:none">Next Word ▶</button>
+</div>
+<script>
+const WORDS=[{w:'elephant',h:'Large animal with a trunk'},{w:'guitar',h:'Musical instrument with strings'},{w:'python',h:'Programming language or snake'},{w:'rocket',h:'Goes to space'},{w:'castle',h:'Medieval fortress'},{w:'library',h:'Books are stored here'},{w:'dolphin',h:'Smart ocean mammal'},{w:'compass',h:'Finds direction'},{w:'volcano',h:'Erupts with lava'},{w:'lantern',h:'A source of light'}];
+const FIGS=['😊','😟','😰','😨','😱','🤒','💀'];
+let word,guessed,wrong,wins=0;
+const figEl=document.getElementById('figure'),hintEl=document.getElementById('hint'),wordEl=document.getElementById('wordDisplay'),kbEl=document.getElementById('keyboard'),statusEl=document.getElementById('status'),nextBtn=document.getElementById('nextBtn'),winsEl=document.getElementById('wins');
+function newGame(){
+  const entry=WORDS[Math.floor(Math.random()*WORDS.length)];
+  word=entry.w; guessed=new Set(); wrong=0;
+  hintEl.textContent='Hint: '+entry.h; statusEl.textContent=''; nextBtn.style.display='none'; figEl.textContent=FIGS[0];
+  render(); buildKB();
+}
+function render(){
+  wordEl.innerHTML=word.split('').map(ch=>`<div class="hm-letter">${guessed.has(ch)?ch.toUpperCase():''}</div>`).join('');
+}
+function buildKB(){
+  kbEl.innerHTML='abcdefghijklmnopqrstuvwxyz'.split('').map(l=>`<button class="hm-key" data-l="${l}">${l.toUpperCase()}</button>`).join('');
+  kbEl.querySelectorAll('.hm-key').forEach(btn=>{
+    btn.addEventListener('click',()=>guess(btn.dataset.l));
+    btn.addEventListener('touchend',e=>{e.preventDefault();guess(btn.dataset.l);},{passive:false});
+  });
+}
+function guess(l){
+  if(guessed.has(l)) return;
+  guessed.add(l);
+  const btn=[...kbEl.querySelectorAll('.hm-key')].find(b=>b.dataset.l===l);
+  if(word.includes(l)){btn.classList.add('correct');}
+  else{wrong++;btn.classList.add('wrong');figEl.textContent=FIGS[wrong];}
+  btn.disabled=true; render();
+  if(word.split('').every(c=>guessed.has(c))){wins++;winsEl.textContent=wins;statusEl.textContent='🎉 You Win!';nextBtn.style.display='block';}
+  else if(wrong>=6){statusEl.textContent='💀 Word was: '+word.toUpperCase();nextBtn.style.display='block';}
+}
+nextBtn.addEventListener('click',newGame);
+newGame();
+</script></body></html>
