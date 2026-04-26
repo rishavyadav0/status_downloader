@@ -11,9 +11,10 @@
 }
 
 .gamezone-wrapper {
-    max-width: 700px;
-    margin: 0 auto 60px;
-    padding: 0 20px;
+    width: 100%;
+    max-width: 600px;
+    margin: 28px 0 40px;
+    padding: 0;
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.7s ease, transform 0.7s ease;
@@ -63,8 +64,12 @@
 /* ===== Games Grid ===== */
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 420px) {
+    .games-grid { grid-template-columns: 1fr; }
 }
 
 .game-card {
@@ -271,7 +276,11 @@
 }
 .action-btn:active { transform: scale(0.96); }
 
-@media (max-width: 480px) {
-    .games-grid { grid-template-columns: 1fr; }
+/* ===== Mobile override ===== */
+@media (max-width: 420px) {
     .game-tag { display: none; }
+    .game-icon { width: 48px; height: 48px; font-size: 2rem; }
+    .game-info h3 { font-size: 0.95rem; }
+    .game-info p { font-size: 0.78rem; }
+    .game-card { padding: 14px; gap: 12px; border-radius: 14px; }
 }
